@@ -6,3 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+spin_sleep = "^1.0"
+log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
+simple_logger = "^2.1"
+daemonize = "0.4"
+tempfile = "^3.3"
+fs2 = "0.4"
