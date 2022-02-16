@@ -165,7 +165,8 @@ fn acquire(
 /// as the file is already in proper format
 fn fetch(cache: &Path) -> Result<(), Box<dyn Error>> {
     // We need a temporary file
-    let fetchpath = NamedTempFile::new()?;
+    let fetchpath =
+        NamedTempFile::new_in(cache.parent().expect("Could not find useful temp path"))?;
     debug!("Fetchcache: {:?}, Cache: {:?}", fetchpath, cache);
     // Rename the cache file, to ensure that acquire doesn't add data
     // between us outputting data and deleting the file
