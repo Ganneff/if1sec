@@ -1,6 +1,6 @@
 [package]
 name = "if1sec"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "munin interface graph plugin, 1second resolution"
 license = "GPL-3.0-only"
@@ -24,7 +24,7 @@ codegen-units = 1
 
 [package.metadata.deb]
 assets = [
-    ["target/release/if1sec", "usr/share/munin/plugins", "755"],
+    ["target/release/if1sec", "usr/share/munin/plugins/if1sec_", "755"],
 ]
 maintainer-scripts = "debian/"
 section = "net"
