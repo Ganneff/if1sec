@@ -2,6 +2,9 @@
 name = "if1sec"
 version = "0.1.0"
 edition = "2021"
+description = "munin interface graph plugin, 1second resolution"
+license = "GPL-3.0-only"
+authors = [ "Joerg Jaspert <joerg@ganneff.de>" ]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,3 +19,9 @@ fs2 = "0.4"
 [profile.release]
 lto = true
 codegen-units = 1
+
+[package.metadata.deb]
+assets = [
+    ["target/release/if1sec", "usr/share/munin/plugins", "755"],
+]
+maintainer-scripts = "debian/"

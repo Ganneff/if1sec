@@ -1,4 +1,9 @@
 //! if1sec - Collect network interface data for munin every second
+//!
+//! Use as munin plugin, it expects to be symlinked per interface. So
+//! a symlink if1sec_eth0 to this plugin will collect data for the eth0
+//! interface.
+// SPDX-License-Identifier:  GPL-3.0-only
 
 #![warn(missing_docs)]
 
