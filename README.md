@@ -24,6 +24,14 @@ less logging code than the debug build, so if you want to find out,
 why something does not work as planned, ensure to use a debug build
 (`cargo build` instead of `cargo build --release`).
 
+## Packages
+Note that they do not live up to distribution quality, but they do
+work for an easy install.
+
 ### Debian package
 A minimal Debian package can be build using `cargo deb`, provided that
 you installed this feature (`cargo install cargo-deb`).
+
+### RPM package
+A minimal package for RPM based systems can be build using `cargo
+rpm`, provided that you installed this feature (`cargo install cargo-rpm`)
