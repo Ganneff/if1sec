@@ -225,11 +225,7 @@ fn main() {
     // Does the master support dirtyconfig?
     let dirtyconfig = match env::var("MUNIN_CAP_DIRTYCONFIG") {
         Ok(val) => {
-            if val.eq(&"1") {
-                true
-            } else {
-                false
-            }
+            val.eq(&"1")
         }
         Err(_) => false,
     };
@@ -243,13 +239,9 @@ fn main() {
             // Before we fetch we should ensure that we have a data
             // gatherer running. It locks the pidfile, so lets see if
             // it's locked or we can have it.
-            let lockfile = if !Path::exists(&pidfile) || {
+            let lockfile = !Path::exists(&pidfile) || {
                 let lockedfile = File::open(&pidfile).expect("Could not open pidfile");
                 lockedfile.try_lock_exclusive().is_ok()
-            } {
-                true
-            } else {
-                false
             };
 
             if lockfile {
