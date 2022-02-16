@@ -27,3 +27,8 @@ assets = [
     ["target/release/if1sec", "usr/share/munin/plugins", "755"],
 ]
 maintainer-scripts = "debian/"
+section = "net"
+priority = "optional"
+extended-description="1second resolution graphs for network interfaces"
+maintainer = "Joerg Jaspert <joerg@ganneff.de>"
+copyright = "2022, Joerg Jaspert <joerg@ganneff.de>"
