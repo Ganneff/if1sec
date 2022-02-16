@@ -229,9 +229,7 @@ fn main() {
 
     // Does the master support dirtyconfig?
     let dirtyconfig = match env::var("MUNIN_CAP_DIRTYCONFIG") {
-        Ok(val) => {
-            val.eq(&"1")
-        }
+        Ok(val) => val.eq(&"1"),
         Err(_) => false,
     };
     debug!("Dirtyconfig is: {:?}", dirtyconfig);
