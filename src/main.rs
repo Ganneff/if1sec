@@ -220,7 +220,7 @@ fn main() {
     }
 
     // Where is our plugin state directory?
-    let plugstate = env::var("MUNIN_PLUGSTATE").expect("Could not read MUNIN_PLUGSTATE variable");
+    let plugstate = env::var("MUNIN_PLUGSTATE").unwrap_or("/tmp".to_owned());
     debug!("Plugin State: {:#?}", plugstate);
     // Put our cache file there
     let cache = Path::new(&plugstate).join(format!("munin.if1sec_{}.value", interface));
