@@ -24,6 +24,12 @@ less logging code than the debug build, so if you want to find out,
 why something does not work as planned, ensure to use a debug build
 (`cargo build` instead of `cargo build --release`).
 
+## Musl
+Note that I build using musl, as I want fully static binaries.
+"Normal" rust link against libc, and that may carry symbols that
+aren't available everywhere (older versions). If you do not have that
+requirement, not using musl will be fine.
+
 ## Packages
 Note that they do not live up to distribution quality, but they do
 work for an easy install.
@@ -34,4 +40,4 @@ you installed this feature (`cargo install cargo-deb`).
 
 ### RPM package
 A minimal package for RPM based systems can be build using `cargo
-rpm`, provided that you installed this feature (`cargo install cargo-rpm`)
+generate-rpm`, provided that you installed this feature (`cargo install cargo-generate-rpm`)
