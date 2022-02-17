@@ -1,6 +1,6 @@
 [package]
 name = "if1sec"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "munin interface graph plugin, 1second resolution"
 license = "GPL-3.0-only"
