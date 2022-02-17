@@ -252,10 +252,6 @@ fn main() {
             };
 
             if lockfile {
-                // if Path::exists(&pidfile) {
-                //     let lockfile = File::open(&pidfile).expect("Could not open pidfile");
-                //     if lockfile.try_lock_exclusive().is_ok() {
-                //         // Appears we can lock exclusive -> acquire doesn't seem to be running
                 debug!("Could lock the pidfile, will spawn acquire now");
                 Command::new(&args[0])
                     .arg("acquire".to_owned())
