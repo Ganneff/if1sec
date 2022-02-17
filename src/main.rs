@@ -49,7 +49,10 @@ fn config(interface: &str) -> Result<(), Box<dyn Error>> {
     let speedpath = Path::new("/sys/class/net/").join(&interface).join("speed");
     debug!("speed: {:#?}", speedpath);
     let speed: usize = if Path::exists(&speedpath) {
-        let rspeed: isize = std::fs::read_to_string(&speedpath)?.trim().parse()?;
+        let rspeed: isize = std::fs::read_to_string(&speedpath)
+            .unwrap_or("0".to_owned())
+            .trim()
+            .parse()?;
         if rspeed <= 0 {
             1000
         } else {
