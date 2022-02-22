@@ -82,7 +82,7 @@ dependencies = [
 
 [[package]]
 name = "if1sec"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "daemonize",
  "fs2",
