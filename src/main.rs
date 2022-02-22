@@ -16,7 +16,7 @@ use std::{
     env,
     error::Error,
     fs::{rename, File, OpenOptions},
-    io::{self, Write},
+    io::{self, BufWriter, Write},
     path::Path,
     process::{Command, Stdio},
     thread,
@@ -45,6 +45,12 @@ fn get_interface() -> String {
 /// real here. And 1000 is a nice value for them, though they don't
 /// really have a physical limitation.
 fn config(interface: &str) -> Result<(), Box<dyn Error>> {
+    // We want to write a larger amount to stdout, take and lock it
+    let stdout = io::stdout();
+    // Also, put a BufWriter. No cost, but gathers multiple (8k by
+    // default) writeln! into one write() call
+    let mut handle = BufWriter::new(stdout.lock());
+
     // Check network "speed" as shown by VM
     let speedpath = Path::new("/sys/class/net/").join(&interface).join("speed");
     debug!("speed: {:#?}", speedpath);
@@ -63,34 +69,41 @@ fn config(interface: &str) -> Result<(), Box<dyn Error>> {
     };
     let max = speed / 8 * 1000000;
 
-    println!("graph_title Interface 1sec stats for {}", interface);
-    println!("graph_category network");
-    println!("graph_args --base 1000");
-    println!("graph_data_size custom 1d, 1s for 1d, 5s for 2d, 10s for 7d, 1m for 1t, 5m for 1y");
-    println!("graph_vlabel bits in (-) / out (+)");
-    println!("graph_info This graph shows the traffic of the {} network interface. Please note that the traffic is shown in bits per second, not bytes.", interface);
-    println!("update_rate 1");
-    println!("{0}_rx.label {0} bits", interface);
-    println!("{0}_rx.cdef {0}_rx,8,*", interface);
-    println!("{}_rx.type DERIVE", interface);
-    println!("{}_rx.min 0", interface);
-    println!("{}_rx.graph no", interface);
-    println!("{}_tx.label bps", interface);
-    println!("{0}_tx.cdef {0}_tx,8,*", interface);
-    println!("{}_tx.type DERIVE", interface);
-    println!("{}_tx.min 0", interface);
-    println!("{0}_tx.negative {0}_rx", interface);
-    println!("{}_rx.max {}", interface, max);
-    println!("{}_tx.max {}", interface, max);
-    println!(
+    writeln!(handle, "graph_title Interface 1sec stats for {}", interface)?;
+    writeln!(handle, "graph_category network")?;
+    writeln!(handle, "graph_args --base 1000")?;
+    writeln!(
+        handle,
+        "graph_data_size custom 1d, 1s for 1d, 5s for 2d, 10s for 7d, 1m for 1t, 5m for 1y"
+    )?;
+    writeln!(handle, "graph_vlabel bits in (-) / out (+)")?;
+    writeln!(handle, "graph_info This graph shows the traffic of the {} network interface. Please note that the traffic is shown in bits per second, not bytes.", interface)?;
+    writeln!(handle, "update_rate 1")?;
+    writeln!(handle, "{0}_rx.label {0} bits", interface)?;
+    writeln!(handle, "{0}_rx.cdef {0}_rx,8,*", interface)?;
+    writeln!(handle, "{}_rx.type DERIVE", interface)?;
+    writeln!(handle, "{}_rx.min 0", interface)?;
+    writeln!(handle, "{}_rx.graph no", interface)?;
+    writeln!(handle, "{}_tx.label bps", interface)?;
+    writeln!(handle, "{0}_tx.cdef {0}_tx,8,*", interface)?;
+    writeln!(handle, "{}_tx.type DERIVE", interface)?;
+    writeln!(handle, "{}_tx.min 0", interface)?;
+    writeln!(handle, "{0}_tx.negative {0}_rx", interface)?;
+    writeln!(handle, "{}_rx.max {}", interface, max)?;
+    writeln!(handle, "{}_tx.max {}", interface, max)?;
+    writeln!(
+        handle,
         "{0}_rx.info Received traffic on the {0} interface. Maximum speed is {1} Mbps.",
         interface, speed
-    );
-    println!(
+    )?;
+    writeln!(
+        handle,
         "{0}_tx.info Transmitted traffic on the {0} interface. Maximum speed {1} Mbps.",
         interface, speed
-    );
+    )?;
 
+    // Explicit flush, in case it wants to throw an error
+    handle.flush()?;
     Ok(())
 }
 
@@ -134,18 +147,22 @@ fn acquire(
                     .expect("Time gone broken, what?")
                     .as_secs(); // without the nanosecond part
 
-                // Read in the received and transferred bytes, store as u128
-                let rx: u128 = std::fs::read_to_string(&rxfile)?.trim().parse()?;
-                let tx: u128 = std::fs::read_to_string(&txfile)?.trim().parse()?;
+                // Read in the received and transferred bytes, store as u64
+                let rx: u64 = std::fs::read_to_string(&rxfile)?.trim().parse()?;
+                let tx: u64 = std::fs::read_to_string(&txfile)?.trim().parse()?;
                 // This block only to ensure we close the cachefd before we go sleep
                 {
-                    // Open the munin cachefile to store our values
-                    let mut cachefd = OpenOptions::new()
-                        .create(true) // If not there, create
-                        .write(true) // We want to write
-                        .append(true) // We want to append
-                        .open(cachefile)
-                        .expect("Couldn't open file");
+                    // Open the munin cachefile to store our values,
+                    // using as BufWriter to "collect" the two writeln
+                    // together
+                    let mut cachefd = BufWriter::new(
+                        OpenOptions::new()
+                            .create(true) // If not there, create
+                            .write(true) // We want to write
+                            .append(true) // We want to append
+                            .open(cachefile)?,
+                    );
+
                     // And now write out values
                     writeln!(cachefd, "{0}_tx.value {1}:{2}", interface, epoch, tx)?;
                     writeln!(cachefd, "{0}_rx.value {1}:{2}", interface, epoch, rx)?;
@@ -176,11 +193,12 @@ fn fetch(cache: &Path) -> Result<(), Box<dyn Error>> {
     rename(&cache, &fetchpath)?;
     // We want to write possibly large amount to stdout, take and lock it
     let stdout = io::stdout();
-    let mut handle = stdout.lock();
+    let mut handle = BufWriter::with_capacity(65536, stdout.lock());
     // Want to read the tempfile now
     let mut fetchfile = std::fs::File::open(&fetchpath)?;
     // And ask io::copy to just take it all and show it into stdout
     io::copy(&mut fetchfile, &mut handle)?;
+    handle.flush()?;
     Ok(())
 }
 
