@@ -1,6 +1,6 @@
 [package]
 name = "if1sec"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "munin interface graph plugin, 1second resolution"
 license = "GPL-3.0-only"
@@ -8,19 +8,6 @@ authors = [ "Joerg Jaspert <joerg@ganneff.de>" ]
 readme = "README.md"
 repository = "https://github.com/Ganneff/if1sec"
 keywords = [ "munin", "statistics", "daemon" ]
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-spin_sleep = "^1.0"
-log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
-simple_logger = "^2.1"
-daemonize = "0.4"
-tempfile = "^3.3"
-fs2 = "0.4"
-
-[profile.release]
-lto = true
-codegen-units = 1
 
 [package.metadata.deb]
 assets = [
@@ -38,3 +25,18 @@ depends = ""
 assets = [
     { source = "target/release/if1sec", dest = "/usr/share/munin/plugins/if1sec_", mode = "755" },
 ]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+spin_sleep = "^1.0"
+log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
+simple_logger = "^2.1"
+daemonize = "0.4"
+tempfile = "^3.3"
+fs2 = "0.4"
+munin-plugin = "0.1.5"
+anyhow = "1.0.57"
+
+[profile.release]
+lto = true
+codegen-units = 1
