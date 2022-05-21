@@ -23,10 +23,6 @@ struct InterfacePlugin {
     /// For which interface we should gather data
     interface: String,
 
-    /// Cachefile path, where the acquire function writes to, and
-    /// fetch reads from.
-    cache: PathBuf,
-
     /// Where to get TXBytes from
     if_txbytes: PathBuf,
 
@@ -69,7 +65,6 @@ impl Default for InterfacePlugin {
             interface,
             if_rxbytes,
             if_txbytes,
-            cache: Path::new("/tmp/").to_path_buf(),
         }
     }
 }
@@ -137,7 +132,7 @@ impl MuninPlugin for InterfacePlugin {
     }
 
     fn acquire<W: Write>(
-        &self,
+        &mut self,
         handle: &mut BufWriter<W>,
         _config: &Config,
         epoch: u64,
@@ -165,9 +160,7 @@ fn main() -> Result<()> {
     // Fetchsize 64k is arbitary, but better than default 8k.
     config.fetchsize = 65535;
 
-    let iface = InterfacePlugin {
-        cache: Path::new(&config.plugin_statedir)
-            .join(format!("munin.{}.value", config.plugin_name)),
+    let mut iface = InterfacePlugin {
         ..Default::default()
     };
 
