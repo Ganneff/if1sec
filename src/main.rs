@@ -12,12 +12,9 @@ use log::{debug, error, info, warn};
 use munin_plugin::{Config, MuninPlugin};
 use simple_logger::SimpleLogger;
 use std::{
-    fs::{rename, OpenOptions},
-    io::{self, BufWriter, Write},
+    io::{BufWriter, Write},
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
 };
-use tempfile::NamedTempFile;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// The struct for our plugin, so we can easily store some values over
@@ -85,7 +82,7 @@ impl MuninPlugin for InterfacePlugin {
             .join("speed");
         debug!("speed: {:#?}", speedpath);
         let speed: usize = if Path::exists(&speedpath) {
-            let rspeed: isize = std::fs::read_to_string(&speedpath)
+            let rspeed: usize = std::fs::read_to_string(&speedpath)
                 .unwrap_or_else(|_| "0".to_owned())
                 .trim()
                 .parse()?;
@@ -139,54 +136,19 @@ impl MuninPlugin for InterfacePlugin {
         Ok(())
     }
 
-    fn fetch<W: Write>(&self, handle: &mut BufWriter<W>) -> Result<()> {
-        // We need a temporary file
-        let fetchpath = NamedTempFile::new_in(
-            self.cache
-                .parent()
-                .expect("Could not find useful temp path"),
-        )?;
-        debug!("Fetchcache: {:?}, Cache: {:?}", fetchpath, self.cache);
-        // Rename the cache file, to ensure that acquire doesn't add data
-        // between us outputting data and deleting the file
-        rename(&self.cache, &fetchpath)?;
-        // Want to read the tempfile now
-        let mut fetchfile = std::fs::File::open(&fetchpath)?;
-        // And ask io::copy to just take it all and shove it into the handle
-        io::copy(&mut fetchfile, handle)?;
-        Ok(())
-    }
-
-    /// Check autoconf
-    fn check_autoconf(&self) -> bool {
-        true
-    }
-
-    fn acquire(&mut self, config: &Config) -> Result<()> {
-        let cache = Path::new(&config.plugin_statedir).join("munin.if1sec.value");
-        let epoch = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .expect("Time gone broken, what?")
-            .as_secs(); // without the nanosecond part
-
+    fn acquire<W: Write>(
+        &self,
+        handle: &mut BufWriter<W>,
+        _config: &Config,
+        epoch: u64,
+    ) -> Result<()> {
         // Read in the received and transferred bytes, store as u64
         let rx: u64 = std::fs::read_to_string(&self.if_rxbytes)?.trim().parse()?;
         let tx: u64 = std::fs::read_to_string(&self.if_txbytes)?.trim().parse()?;
 
-        // Open the munin cachefile to store our values,
-        // using a BufWriter to "collect" the two writeln
-        // together
-        let mut cachefd = BufWriter::new(
-            OpenOptions::new()
-                .create(true) // If not there, create
-                .write(true) // We want to write
-                .append(true) // We want to append
-                .open(&cache)?,
-        );
-
         // And now write out values
-        writeln!(cachefd, "{0}_tx.value {1}:{2}", self.interface, epoch, tx)?;
-        writeln!(cachefd, "{0}_rx.value {1}:{2}", self.interface, epoch, rx)?;
+        writeln!(handle, "{0}_tx.value {1}:{2}", self.interface, epoch, tx)?;
+        writeln!(handle, "{0}_rx.value {1}:{2}", self.interface, epoch, rx)?;
 
         Ok(())
     }
@@ -203,7 +165,7 @@ fn main() -> Result<()> {
     // Fetchsize 64k is arbitary, but better than default 8k.
     config.fetchsize = 65535;
 
-    let mut iface = InterfacePlugin {
+    let iface = InterfacePlugin {
         cache: Path::new(&config.plugin_statedir)
             .join(format!("munin.{}.value", config.plugin_name)),
         ..Default::default()
