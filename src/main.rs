@@ -1,4 +1,4 @@
-//! if1sec - Collect network interface data for munin every second
+//! munin-if1sec - Collect network interface data for munin every second
 //!
 //! Use as munin plugin, it expects to be symlinked per interface. So
 //! a symlink if1sec_eth0 to this plugin will collect data for the eth0
@@ -31,7 +31,8 @@ struct InterfacePlugin {
 }
 
 impl InterfacePlugin {
-    /// Check the name we are called with and split it on _.
+    /// Check the name we are called with, split it on _ and return
+    /// the last part. So if1sec_eth0 -> eth0.
     fn get_interface() -> String {
         std::env::args()
             .next()

@@ -1,17 +1,17 @@
 [package]
-name = "if1sec"
-version = "0.1.7"
+name = "munin-if1sec"
+version = "0.2.0"
 edition = "2021"
 description = "munin interface graph plugin, 1second resolution"
 license = "GPL-3.0-only"
-authors = [ "Joerg Jaspert <joerg@ganneff.de>" ]
+authors = ["Jörg Jaspert <joerg@debian.org>"]
 readme = "README.md"
-repository = "https://github.com/Ganneff/if1sec"
-keywords = [ "munin", "statistics", "daemon" ]
+repository = "https://github.com/Ganneff/munin-if1sec"
+keywords = [ "munin", "statistics", "daemon", "munin-plugin" ]
 
 [package.metadata.deb]
 assets = [
-    ["target/release/if1sec", "usr/share/munin/plugins/if1sec_", "755"],
+    ["target/release/munin-if1sec", "usr/share/munin/plugins/if1sec_", "755"],
 ]
 maintainer-scripts = "debian/"
 section = "net"
@@ -19,22 +19,18 @@ priority = "optional"
 extended-description="1second resolution graphs for network interfaces"
 maintainer = "Joerg Jaspert <joerg@ganneff.de>"
 copyright = "2022, Joerg Jaspert <joerg@ganneff.de>"
-depends = ""
+depends = "munin-node"
 
 [package.metadata.generate-rpm]
 assets = [
-    { source = "target/release/if1sec", dest = "/usr/share/munin/plugins/if1sec_", mode = "755" },
+    { source = "target/release/munin-if1sec", dest = "/usr/share/munin/plugins/if1sec_", mode = "755" },
 ]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-spin_sleep = "^1.0"
 log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
 simple_logger = "^2.1"
-daemonize = "0.4"
-tempfile = "^3.3"
-fs2 = "0.4"
-munin-plugin = "0.1.5"
+munin-plugin = "0.1.12"
 anyhow = "1.0.57"
 
 [profile.release]
