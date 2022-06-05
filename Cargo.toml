@@ -1,6 +1,6 @@
 [package]
 name = "munin-if1sec"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "munin interface graph plugin, 1second resolution"
 license = "GPL-3.0-only"
@@ -30,7 +30,7 @@ assets = [
 [dependencies]
 log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
 simple_logger = "^2.1"
-munin-plugin = "0.1.12"
+munin-plugin = "0.1.14"
 anyhow = "1.0.57"
 
 [profile.release]

@@ -155,11 +155,9 @@ fn main() -> Result<()> {
     info!("if1sec started");
 
     // Set out config
-    let mut config = Config::new(String::from("if1sec"));
-    // Yes, we want to run as a daemon, gathering data once a second
-    config.daemonize = true;
+    let mut config = Config::new_daemon(String::from("if1sec"));
     // Fetchsize 64k is arbitary, but better than default 8k.
-    config.fetchsize = 65535;
+    config.fetch_size = 65535;
 
     let mut iface = InterfacePlugin {
         ..Default::default()
