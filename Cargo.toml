@@ -29,9 +29,10 @@ assets = [
 
 [dependencies]
 log = { version = "0.4", features = ["max_level_trace", "release_max_level_warn"] }
-simple_logger = "^2.1"
+simple_logger = "4"
 munin-plugin = "0.1.14"
-anyhow = "1.0.57"
+anyhow = "1"
+fehler = "1.0.0"
 
 [profile.release]
 lto = true
